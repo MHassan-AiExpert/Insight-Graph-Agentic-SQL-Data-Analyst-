@@ -2,22 +2,29 @@
 
 ## Test strategy
 
+Per-module details (how each module works, how it was built, and its test cases) are in [`../reports`](../reports).
+
 | Level | File | Count | What it proves |
 |-------|------|------:|----------------|
+| Unit — configuration | `backend/tests/test_config.py` | 4 | Defaults, overrides, CORS parsing, business rules |
+| Unit — data generator | `backend/tests/test_seed.py` | 5 | Determinism, counts, integrity, constraints |
+| Unit — LLM layer | `backend/tests/test_llm.py` | 8 | Scripted provider, schema validation, Groq client, prompts |
 | Unit — SQL guard | `backend/tests/test_sql_guard.py` | 27 | Read-only enforcement, LIMIT handling, intent pre-check |
 | Unit — database | `backend/tests/test_database.py` | 9 | Introspection, read-only connection, timeout, error messages |
 | Unit — charts | `backend/tests/test_charts.py` | 7 | Chart recommendation and validation |
 | Integration — graph | `backend/tests/test_graph.py` | 11 | Routing, self-correction, give-up, memory, thread isolation |
 | Integration — API | `backend/tests/test_api.py` | 8 | REST + SSE contract, validation, history |
 | Regression — golden scenarios | `backend/tests/test_scenarios.py` | 10 | Seven realistic business questions end-to-end against the real database |
-| **Total** | | **72** | |
+| Frontend — unit and component | `frontend/src/__tests__/*` | 17 | Formatting, SSE parsing, Pipeline, ResultsTable, Composer |
+| **Total** | | **106** | |
 
 All tests run offline. A fresh database is seeded into a temporary directory and the language model is replaced with `ScriptedLLM`, which replays predefined structured responses. The real graph, guard and database code paths still run on every test.
 
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest            # 72 passed
+pytest            # 89 passed
+cd ../frontend && npm test   # 17 passed
 ruff check .
 ```
 
@@ -91,6 +98,9 @@ ruff check .
 
 ```
 $ pytest
-........................................................................ [100%]
-72 passed
+89 passed
+
+$ npm test
+Test Files  3 passed (3)
+     Tests  17 passed (17)
 ```

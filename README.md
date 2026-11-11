@@ -12,7 +12,7 @@ Built with **LangGraph**, **LangChain**, **FastAPI**, **React + TypeScript** and
 ![FastAPI](https://img.shields.io/badge/FastAPI-SSE-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-72%20passing-2E7D52)
+![Tests](https://img.shields.io/badge/tests-106%20passing-2E7D52)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ![InsightGraph answering "What is total revenue by region?"](docs/screenshots/02-revenue-by-region.png)
@@ -72,7 +72,7 @@ Every step streams to the UI in real time, so users can see exactly how each ans
 | ⚡ | **Live streaming** | Server-Sent Events emit each node as it finishes; the UI animates a six-stage pipeline |
 | 🔍 | **Full transparency** | Reasoning trace with timings, SQL viewer, assumptions, tables used and every fixed error |
 | 📥 | **Results workspace** | Sortable, paginated table with currency and percentage formatting and CSV export |
-| 🧪 | **Deterministic test suite** | 72 tests, including golden business scenarios, that run without network or API key |
+| 🧪 | **Deterministic test suite** | 106 automated tests (89 backend + 17 frontend), including golden business scenarios, that run without network or API key |
 | 🐳 | **One-command deploy** | Multi-stage Docker image serving the API and the React app on one port |
 
 ## How it works
@@ -401,21 +401,24 @@ curl -N -X POST http://localhost:8000/api/ask/stream \
 ## Testing
 
 ```bash
-cd backend
-pytest          # 72 passed
-ruff check .
+cd backend && pytest          # 89 passed
+cd frontend && npm test       # 17 passed
 ```
 
 | Suite | Tests | Covers |
 |-------|------:|--------|
 | `test_sql_guard.py` | 27 | Allowed and blocked queries, nested DML in CTEs, LIMIT handling, intent pre-check |
 | `test_database.py` | 9 | Introspection, read-only connection, timeout, readable errors |
+| `test_seed.py` | 5 | Deterministic data, counts, integrity, business constraints |
+| `test_config.py` | 4 | Defaults, environment overrides, CORS parsing, business rules |
+| `test_llm.py` | 8 | Scripted provider, schema validation, Groq client setup, prompt rendering |
 | `test_charts.py` | 7 | Chart recommendation and validation |
 | `test_graph.py` | 11 | Routing, self-correction (execution, validation, empty result), give-up, memory, thread isolation |
 | `test_api.py` | 8 | REST + SSE contract, validation, history |
 | `test_scenarios.py` | 10 | Golden business scenarios end-to-end against the real database |
+| `frontend/src/__tests__` | 17 | Formatting, SSE stream parsing, Pipeline, ResultsTable and Composer components |
 
-The suite uses a scripted LLM that replays structured responses. The real graph, guard and database code paths run on every test, and CI needs no API key. The full test plan with test-case IDs is in [`docs/04-test-cases.md`](docs/04-test-cases.md).
+The backend suite uses a scripted LLM that replays structured responses. The real graph, guard and database code paths run on every test, and CI needs no API key. The full test plan is in [`docs/04-test-cases.md`](docs/04-test-cases.md), and every module has its own report with its test cases in [`reports/`](reports).
 
 ## Project structure
 
@@ -439,7 +442,7 @@ The suite uses a scripted LLM that replays structured responses. The real graph,
 │   │   │   └── charts.py       # Chart validation + fallback recommender
 │   │   ├── config.py           # pydantic-settings configuration
 │   │   └── main.py             # FastAPI app, CORS, SPA hosting
-│   ├── tests/                  # 72 tests + golden scenario fixtures
+│   ├── tests/                  # 89 tests + golden scenario fixtures
 │   ├── requirements.txt
 │   └── pyproject.toml
 ├── frontend/
@@ -447,7 +450,8 @@ The suite uses a scripted LLM that replays structured responses. The real graph,
 │       ├── App.tsx             # Layout, conversation state, streaming
 │       ├── api.ts              # Typed API + SSE client
 │       ├── format.ts           # Number, currency and percent formatting
-│       └── components/         # Pipeline, AnswerSheet, ResultChart, ResultsTable, SqlViewer, Sidebar, Composer
+│       ├── components/         # Pipeline, AnswerSheet, ResultChart, ResultsTable, SqlViewer, Sidebar, Composer
+│       └── __tests__/          # 17 Vitest + Testing Library tests
 ├── docs/
 │   ├── 01-project-document.md
 │   ├── 02-system-design.md
@@ -456,6 +460,7 @@ The suite uses a scripted LLM that replays structured responses. The real graph,
 │   ├── 05-ui-ux-design.md
 │   ├── diagrams/               # Mermaid sources + rendered PNGs
 │   └── screenshots/
+├── reports/                    # One report per module: how it works, how it was built, test cases
 ├── .github/workflows/ci.yml    # Lint, tests, frontend build, Docker build
 ├── Dockerfile                  # Multi-stage: Node build → Python runtime
 ├── docker-compose.yml
@@ -471,6 +476,7 @@ The suite uses a scripted LLM that replays structured responses. The real graph,
 | [System features](docs/03-system-features.md) | Detailed feature catalogue |
 | [Test cases](docs/04-test-cases.md) | Test strategy, functional, security, chart and UI test cases |
 | [UI/UX design](docs/05-ui-ux-design.md) | Personas, information architecture, design tokens, components, states, accessibility, responsive rules |
+| [Module reports](reports) | One report per module (configuration, database, data generator, SQL guard, LLM layer, LangGraph agent, charts, API, frontend, testing/CI) with design decisions and test results |
 | [Diagrams](docs/diagrams) | Architecture, LangGraph workflow, generated graph, sequence, ER, safety layers, deployment |
 
 ## Roadmap

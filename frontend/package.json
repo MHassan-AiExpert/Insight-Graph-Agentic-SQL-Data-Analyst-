@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.3.0",
@@ -19,11 +20,15 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^31.0.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^5.9.3",
-    "vite": "^6.4.6"
+    "vite": "^6.4.6",
+    "vitest": "^3.2.7"
   }
 }
