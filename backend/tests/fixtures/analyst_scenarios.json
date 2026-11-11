@@ -1,0 +1,445 @@
+{
+  "description": "Golden evaluation scenarios: scripted model responses replayed through the full agent against the sample database.",
+  "scenarios": [
+    {
+      "match": "total revenue by region",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "What is total revenue by region?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "regions",
+              "order_items"
+            ],
+            "reason": "Revenue lives in order_items; the region is reached through orders and customers."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT r.name AS region,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS total_revenue,\n       COUNT(DISTINCT o.order_id) AS orders\nFROM order_items oi\nJOIN orders o ON o.order_id = oi.order_id\nJOIN customers c ON c.customer_id = o.customer_id\nJOIN regions r ON r.region_id = c.region_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY r.name\nORDER BY total_revenue DESC",
+            "reasoning": "Joins order lines to customers and regions, sums net line revenue for completed and shipped orders, and ranks regions.",
+            "assumptions": [
+              "Revenue counts completed and shipped orders, net of line discounts."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "North America is the largest region with $472,022 in revenue from 1,467 orders, followed closely by Europe at $412,031. Together they account for about 60% of total revenue, while Latin America is the smallest market at $111,295.",
+            "key_findings": [
+              "North America leads with $472.0K (32% of revenue).",
+              "Europe is a close second at $412.0K, only $60K behind.",
+              "Asia Pacific contributes $318.9K across 960 orders.",
+              "Latin America generates the least revenue ($111.3K) from 309 orders."
+            ],
+            "chart": {
+              "type": "bar",
+              "x": "region",
+              "y": [
+                "total_revenue"
+              ],
+              "title": "Total revenue by region"
+            },
+            "follow_up_questions": [
+              "Compare Q3 2026 revenue with Q3 2025 by region",
+              "Now only for Europe",
+              "What is the average order value by customer segment?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "only for europe",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "What is the total revenue for the Europe region only?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "regions",
+              "order_items"
+            ],
+            "reason": "Same tables as the previous question, filtered to one region."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT r.name AS region,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS total_revenue,\n       COUNT(DISTINCT o.order_id) AS orders\nFROM order_items oi\nJOIN orders o ON o.order_id = oi.order_id\nJOIN customers c ON c.customer_id = o.customer_id\nJOIN regions r ON r.region_id = c.region_id\nWHERE o.status IN ('completed', 'shipped')\n  AND r.name = 'Europe'\nGROUP BY r.name",
+            "reasoning": "Same revenue definition as the previous question, filtered to the Europe region.",
+            "assumptions": [
+              "Revenue counts completed and shipped orders, net of line discounts."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Europe generated $412,031 in revenue from 1,353 completed or shipped orders, making it the second-largest region.",
+            "key_findings": [
+              "Average order value in Europe is about $305."
+            ],
+            "chart": {
+              "type": "kpi",
+              "x": null,
+              "y": [
+                "total_revenue",
+                "orders"
+              ],
+              "title": "Europe"
+            },
+            "follow_up_questions": [
+              "Show monthly revenue for Europe in 2026",
+              "Who are the top customers in Europe?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "monthly revenue for 2026",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "Show monthly revenue for 2026 as a trend",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "orders",
+              "order_items"
+            ],
+            "reason": "Order dates come from orders and revenue from order_items."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT strftime('%Y-%m', o.order_date) AS month,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS revenue\nFROM orders o\nJOIN order_items oi ON oi.order_id = o.order_id\nWHERE o.status IN ('completed', 'shipped')\n  AND strftime('%Y', o.order_date) = '2026'\nGROUP BY month\nORDER BY month",
+            "reasoning": "Buckets 2026 orders by calendar month and sums net revenue per month.",
+            "assumptions": [
+              "Revenue counts completed and shipped orders, net of line discounts.",
+              "2026 data runs to the end of October."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Revenue in 2026 follows a clear seasonal U-shape. It started strong at $111,057 in January, fell to a low of $40,052 in June, and has climbed back to $100,443 in October as the year-end season approaches.",
+            "key_findings": [
+              "January was the strongest month so far ($111.1K).",
+              "June was the weakest month ($40.1K), 64% below January.",
+              "Revenue grew in three of the last four months, reaching $100.4K in October.",
+              "Year-to-date revenue is about $711.9K."
+            ],
+            "chart": {
+              "type": "line",
+              "x": "month",
+              "y": [
+                "revenue"
+              ],
+              "title": "Monthly revenue, 2026"
+            },
+            "follow_up_questions": [
+              "Compare monthly revenue in 2026 with 2025",
+              "Which categories drove October's revenue?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "top 10 customers",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "Who are the top 10 customers by lifetime value?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "customers",
+              "order_items"
+            ],
+            "reason": "Customer details are in customers; spend comes from order_items via orders."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT c.customer_name AS customer,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS lifetime_value\nFROM customers c\nJOIN orders o ON o.customer_id = c.customer_id\nJOIN order_items oi ON oi.order_id = o.order_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY c.customer_id\nORDER BY lifetime_value DESC\nLIMIT 10",
+            "reasoning": "Sums each customer's net revenue across all their orders and keeps the top 10.",
+            "assumptions": [
+              "Lifetime value is total net revenue from completed and shipped orders."
+            ]
+          },
+          {
+            "sql": "SELECT c.name AS customer,\n       c.segment,\n       r.name AS region,\n       COUNT(DISTINCT o.order_id) AS orders,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS lifetime_value\nFROM customers c\nJOIN regions r ON r.region_id = c.region_id\nJOIN orders o ON o.customer_id = c.customer_id\nJOIN order_items oi ON oi.order_id = o.order_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY c.customer_id\nORDER BY lifetime_value DESC\nLIMIT 10",
+            "reasoning": "The customers table stores the name in the `name` column, not `customer_name`. Fixed the column and added segment, region and order count for context.",
+            "assumptions": [
+              "Lifetime value is total net revenue from completed and shipped orders."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Kimberly Ball (Enterprise, North America) is the most valuable customer with $46,131 in lifetime revenue, just ahead of Christopher Morris at $45,285. Enterprise accounts make up 4 of the top 10, while high-frequency Consumer buyers such as Matthew Mitchell (116 orders) reach the list through volume.",
+            "key_findings": [
+              "The top 3 customers are all Enterprise accounts, each above $35K.",
+              "Courtney Rodriguez placed the most orders (122) in the top 10.",
+              "Asia Pacific has 4 customers in the top 10, more than any other region."
+            ],
+            "chart": {
+              "type": "bar",
+              "x": "customer",
+              "y": [
+                "lifetime_value"
+              ],
+              "title": "Top 10 customers by lifetime value"
+            },
+            "follow_up_questions": [
+              "What is the average order value by customer segment?",
+              "Which products do the top customers buy most?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "sales channel",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "What share of orders comes from each sales channel?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "orders"
+            ],
+            "reason": "The channel is a column on orders."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT channel,\n       COUNT(*) AS orders,\n       ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM orders), 1) AS share_pct\nFROM orders\nGROUP BY channel\nORDER BY orders DESC",
+            "reasoning": "Counts orders per channel and divides by the total number of orders.",
+            "assumptions": [
+              "All order statuses are counted, because the question is about order volume."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "The web store is the main channel with 2,721 orders (52.3%). Mobile brings in 1,690 orders (32.5%) and the marketplace 789 orders (15.2%).",
+            "key_findings": [
+              "Web and mobile together account for almost 85% of orders.",
+              "The marketplace share is less than a third of web."
+            ],
+            "chart": {
+              "type": "pie",
+              "x": "channel",
+              "y": [
+                "orders"
+              ],
+              "title": "Orders by sales channel"
+            },
+            "follow_up_questions": [
+              "What is revenue by channel?",
+              "How has the mobile share changed month by month?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "q3 2026",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "Compare Q3 2026 revenue with Q3 2025 by region",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "regions",
+              "order_items"
+            ],
+            "reason": "Revenue from order_items, dates from orders, region via customers."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT r.name AS region,\n       ROUND(SUM(CASE WHEN o.order_date BETWEEN '2025-07-01' AND '2025-09-30'\n                      THEN oi.quantity * oi.unit_price * (1 - oi.discount) ELSE 0 END), 2) AS q3_2025_revenue,\n       ROUND(SUM(CASE WHEN o.order_date BETWEEN '2026-07-01' AND '2026-09-30'\n                      THEN oi.quantity * oi.unit_price * (1 - oi.discount) ELSE 0 END), 2) AS q3_2026_revenue\nFROM order_items oi\nJOIN orders o ON o.order_id = oi.order_id\nJOIN customers c ON c.customer_id = o.customer_id\nJOIN regions r ON r.region_id = c.region_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY r.name\nORDER BY q3_2026_revenue DESC",
+            "reasoning": "Uses conditional aggregation to put Q3 2025 and Q3 2026 revenue side by side for each region.",
+            "assumptions": [
+              "Revenue counts completed and shipped orders, net of line discounts.",
+              "Q3 is July 1 to September 30."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Q3 revenue grew in four of five regions. North America rose 44% to $67,505 and Asia Pacific 41% to $56,049, while Europe grew 24% to $60,969. Latin America was the only region to decline, slipping 2% to $9,819.",
+            "key_findings": [
+              "North America had the largest gain: +$20,515 year over year.",
+              "Asia Pacific is the fastest-growing region after North America (+41%).",
+              "Middle East grew a modest 11%.",
+              "Latin America declined slightly (-2%)."
+            ],
+            "chart": {
+              "type": "bar",
+              "x": "region",
+              "y": [
+                "q3_2025_revenue",
+                "q3_2026_revenue"
+              ],
+              "title": "Q3 revenue by region, 2025 vs 2026"
+            },
+            "follow_up_questions": [
+              "Which product categories drove growth in North America?",
+              "Why did Latin America decline?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "average order value",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "What is the average order value by customer segment?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "customers",
+              "order_items"
+            ],
+            "reason": "The segment is on customers; order values come from order_items."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT c.segment,\n       COUNT(DISTINCT o.order_id) AS orders,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS revenue,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / COUNT(DISTINCT o.order_id), 2) AS avg_order_value\nFROM orders o\nJOIN customers c ON c.customer_id = o.customer_id\nJOIN order_items oi ON oi.order_id = o.order_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY c.segment\nORDER BY avg_order_value DESC",
+            "reasoning": "Divides each segment's net revenue by its number of distinct revenue orders.",
+            "assumptions": [
+              "AOV = revenue / distinct completed or shipped orders."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Enterprise customers spend the most per order at $815, about 2.4 times SMB ($342) and 3.7 times Consumer ($220). Consumers still bring in the most total revenue ($611,214) because they place over half of all orders.",
+            "key_findings": [
+              "Enterprise AOV is $815 across 523 orders.",
+              "Consumer has the lowest AOV but the highest total revenue.",
+              "SMB and Enterprise generate similar total revenue (~$430K each)."
+            ],
+            "chart": {
+              "type": "bar",
+              "x": "segment",
+              "y": [
+                "avg_order_value"
+              ],
+              "title": "Average order value by segment"
+            },
+            "follow_up_questions": [
+              "Which product categories do Enterprise customers buy?",
+              "How many customers are in each segment?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "gross margin",
+      "responses": {
+        "intent": [
+          {
+            "intent": "data_question",
+            "standalone_question": "Which product categories have the highest gross margin?",
+            "reason": "The question asks for metrics that can be computed from the sales tables."
+          }
+        ],
+        "tables": [
+          {
+            "tables": [
+              "products",
+              "order_items"
+            ],
+            "reason": "Category and unit cost are on products; quantities and prices on order_items."
+          }
+        ],
+        "sql": [
+          {
+            "sql": "SELECT p.category,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS revenue,\n       ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) - SUM(oi.quantity * p.unit_cost), 2) AS gross_profit,\n       ROUND(100.0 * (SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) - SUM(oi.quantity * p.unit_cost))\n             / SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 1) AS gross_margin_pct\nFROM order_items oi\nJOIN orders o ON o.order_id = oi.order_id\nJOIN products p ON p.product_id = oi.product_id\nWHERE o.status IN ('completed', 'shipped')\nGROUP BY p.category\nORDER BY gross_margin_pct DESC",
+            "reasoning": "Computes revenue, cost and gross margin percentage per product category.",
+            "assumptions": [
+              "Cost = quantity x product unit cost.",
+              "Revenue counts completed and shipped orders, net of line discounts."
+            ]
+          }
+        ],
+        "insight": [
+          {
+            "answer": "Beauty & Personal Care has the highest gross margin at 48.0%, followed by Sports & Outdoors at 46.5%. Electronics earns the most gross profit in dollars ($182,277) despite a mid-range 41.7% margin, while Office & Stationery has the thinnest margin at 35.3%.",
+            "key_findings": [
+              "Beauty & Personal Care leads on margin (48.0%).",
+              "Electronics is the largest profit pool at $182.3K.",
+              "Office & Stationery margin (35.3%) is 12.7 points below the leader."
+            ],
+            "chart": {
+              "type": "bar",
+              "x": "category",
+              "y": [
+                "gross_margin_pct"
+              ],
+              "title": "Gross margin by category"
+            },
+            "follow_up_questions": [
+              "Which Office & Stationery products have the lowest margin?",
+              "How do discounts affect margin by category?"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "match": "hello",
+      "responses": {
+        "intent": [
+          {
+            "intent": "small_talk",
+            "standalone_question": "hello",
+            "reason": "A greeting, not a data question."
+          }
+        ]
+      }
+    }
+  ]
+}

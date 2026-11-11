@@ -1,0 +1,23 @@
+flowchart TD
+    S([START]) --> CI[classify_intent<br/>safety pre-check + LLM router]
+    CI -->|data_question| ST[select_tables<br/>LLM picks tables + FK bridge tables]
+    CI -->|small_talk / unsafe / out_of_scope| RD[respond_direct<br/>no SQL is generated]
+    ST --> GS[generate_sql<br/>structured output: sql, reasoning, assumptions]
+    GS --> VS{validate_sql<br/>sqlglot AST guard}
+    VS -->|passed| EX{execute_sql<br/>read-only connection + timeout}
+    VS -->|violation and attempts < max| GS
+    EX -->|rows returned| AR[analyze_results<br/>answer, findings, chart spec]
+    EX -->|error or empty result and attempts < max| GS
+    VS -->|attempts exhausted| GU[give_up]
+    EX -->|attempts exhausted| GU
+    AR --> FN[finalize<br/>save turn to thread memory]
+    RD --> FN
+    GU --> FN
+    FN --> E([END])
+
+    classDef llm fill:#e6ecfb,stroke:#2d5bd8,color:#172033
+    classDef guard fill:#fbf0dc,stroke:#c97f0c,color:#172033
+    classDef db fill:#e3f1e8,stroke:#2e7d52,color:#172033
+    class CI,ST,GS,AR llm
+    class VS guard
+    class EX db

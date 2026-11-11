@@ -1,0 +1,17 @@
+flowchart TB
+    subgraph DEV["Local development"]
+        V[Vite dev server :5173] -->|proxy /api| U[uvicorn :8000]
+    end
+    subgraph DOCKER["Docker image (multi-stage)"]
+        B1[Stage 1: node:20-alpine<br/>npm ci + vite build] --> B2[Stage 2: python:3.12-slim<br/>pip install + app code + frontend/dist]
+        B2 --> RUN[uvicorn app.main:app :8000<br/>serves API + built SPA]
+    end
+    subgraph CI["GitHub Actions"]
+        C1[backend: ruff + pytest<br/>scripted LLM, no API key] 
+        C2[frontend: tsc + vite build]
+        C3[docker build]
+        C1 --> C3
+        C2 --> C3
+    end
+    ENV[.env: GROQ_API_KEY, GROQ_MODEL,<br/>DATABASE_URL, MAX_RESULT_ROWS] --> RUN
+    RUN --> DBV[(SQLite volume or<br/>PostgreSQL via DATABASE_URL)]

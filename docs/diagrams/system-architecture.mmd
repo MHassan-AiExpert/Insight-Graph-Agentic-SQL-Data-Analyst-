@@ -1,0 +1,36 @@
+flowchart TB
+    U([Business user]) --> UI
+
+    subgraph FE["Frontend: React + TypeScript + Vite"]
+        UI[Chat composer] --> SSE[SSE stream client]
+        SSE --> PIPE[Live agent pipeline]
+        SSE --> ANS[Answer, findings, chart]
+        SSE --> TAB[Results table / SQL / details]
+        SCH[Schema explorer]
+    end
+
+    subgraph BE["Backend: FastAPI"]
+        API["/api/ask/stream, /api/ask, /api/schema, /api/health, /api/threads"]
+        subgraph AG["LangGraph agent"]
+            N1[classify_intent] --> N2[select_tables] --> N3[generate_sql] --> N4[validate_sql] --> N5[execute_sql] --> N6[analyze_results]
+            N4 -. retry .-> N3
+            N5 -. retry .-> N3
+        end
+        CP[(Checkpointer: thread memory)]
+        GUARD[SQL guard: sqlglot AST]
+        LLMC[LLM client]
+    end
+
+    subgraph EXT["External"]
+        GROQ[[Groq API: llama-3.3-70b-versatile]]
+        DB[(Read-only database: SQLite / PostgreSQL)]
+    end
+
+    SSE <-->|HTTP + Server-Sent Events| API
+    SCH --> API
+    API --> AG
+    AG <--> CP
+    N4 --> GUARD
+    N1 & N2 & N3 & N6 --> LLMC --> GROQ
+    N5 --> DB
+    N2 -->|introspection| DB

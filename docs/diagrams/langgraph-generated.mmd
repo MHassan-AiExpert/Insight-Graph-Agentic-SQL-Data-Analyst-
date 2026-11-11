@@ -1,0 +1,36 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	classify_intent(classify_intent)
+	select_tables(select_tables)
+	generate_sql(generate_sql)
+	validate_sql(validate_sql)
+	execute_sql(execute_sql)
+	analyze_results(analyze_results)
+	respond_direct(respond_direct)
+	give_up(give_up)
+	finalize(finalize)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> classify_intent;
+	analyze_results --> finalize;
+	classify_intent -.-> respond_direct;
+	classify_intent -.-> select_tables;
+	execute_sql -.-> analyze_results;
+	execute_sql -.-> generate_sql;
+	execute_sql -.-> give_up;
+	generate_sql --> validate_sql;
+	give_up --> finalize;
+	respond_direct --> finalize;
+	select_tables --> generate_sql;
+	validate_sql -.-> execute_sql;
+	validate_sql -.-> generate_sql;
+	validate_sql -.-> give_up;
+	finalize --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+

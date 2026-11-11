@@ -1,0 +1,15 @@
+services:
+  insightgraph:
+    build: .
+    image: insightgraph:latest
+    container_name: insightgraph
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - insightgraph-data:/app/backend/data
+    restart: unless-stopped
+
+volumes:
+  insightgraph-data:

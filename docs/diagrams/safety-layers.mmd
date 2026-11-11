@@ -1,0 +1,22 @@
+flowchart LR
+    Q[User question] --> L1{Layer 1<br/>Destructive-intent pre-check<br/>regex, before any LLM call}
+    L1 -->|blocked| R[Refusal reply]
+    L1 --> L2{Layer 2<br/>LLM intent router<br/>unsafe / out_of_scope}
+    L2 -->|blocked| R
+    L2 --> GEN[SQL generation]
+    GEN --> L3{Layer 3<br/>sqlglot AST guard}
+    L3 -->|violation| FB[Error fed back<br/>for self-correction]
+    FB --> GEN
+    L3 --> L4{Layer 4<br/>Read-only connection<br/>SQLite mode=ro / PG READ ONLY}
+    L4 --> L5{Layer 5<br/>Statement timeout +<br/>enforced row LIMIT}
+    L5 --> OK[Result returned]
+
+    subgraph AST["AST guard rules"]
+        A1[Single statement only]
+        A2[Root must be SELECT / UNION / WITH]
+        A3[No INSERT, UPDATE, DELETE, DDL,<br/>PRAGMA, ATTACH, SET anywhere in tree]
+        A4[Known tables only, CTE-aware]
+        A5[Dangerous functions blocked]
+        A6[LIMIT added or capped]
+    end
+    L3 -.-> AST

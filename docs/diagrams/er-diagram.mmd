@@ -1,0 +1,40 @@
+erDiagram
+    REGIONS ||--o{ CUSTOMERS : "has"
+    CUSTOMERS ||--o{ ORDERS : "places"
+    ORDERS ||--|{ ORDER_ITEMS : "contains"
+    PRODUCTS ||--o{ ORDER_ITEMS : "sold as"
+
+    REGIONS {
+        int region_id PK
+        text name
+    }
+    CUSTOMERS {
+        int customer_id PK
+        text name
+        text email
+        int region_id FK
+        text segment "Consumer | SMB | Enterprise"
+        date signup_date
+    }
+    PRODUCTS {
+        int product_id PK
+        text name
+        text category
+        real unit_price
+        real unit_cost
+    }
+    ORDERS {
+        int order_id PK
+        int customer_id FK
+        date order_date
+        text status "completed | shipped | cancelled | returned"
+        text channel "web | mobile | marketplace"
+    }
+    ORDER_ITEMS {
+        int order_item_id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+        real unit_price
+        real discount
+    }

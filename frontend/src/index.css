@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #172033;
+  --color-ink-soft: #4a5468;
+  --color-ink-faint: #7d8597;
+  --color-paper: #f3f5f2;
+  --color-sheet: #ffffff;
+  --color-grid: #dde3dc;
+  --color-grid-strong: #c5cec4;
+  --color-cobalt: #2d5bd8;
+  --color-cobalt-soft: #e6ecfb;
+  --color-amber: #c97f0c;
+  --color-amber-soft: #fbf0dc;
+  --color-moss: #2e7d52;
+  --color-moss-soft: #e3f1e8;
+  --color-brick: #b8402b;
+  --color-brick-soft: #f8e5e1;
+
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Faint analyst graph-paper behind the conversation column */
+.graph-paper {
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-cobalt);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+}
+
+.sql-keyword {
+  color: var(--color-cobalt);
+  font-weight: 500;
+}
+.sql-string {
+  color: var(--color-moss);
+}
+.sql-number {
+  color: var(--color-amber);
+}
+
+@keyframes pulse-node {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(45, 91, 216, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(45, 91, 216, 0);
+  }
+}
+.node-running {
+  animation: pulse-node 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-running {
+    animation: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-grid-strong);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}

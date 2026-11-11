@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as React UI
+    participant API as FastAPI
+    participant G as LangGraph agent
+    participant L as Groq LLM
+    participant Q as SQL guard
+    participant D as Database (read-only)
+
+    User->>UI: "Who are the top 10 customers by lifetime value?"
+    UI->>API: POST /api/ask/stream {question, thread_id}
+    API-->>UI: event: start {thread_id}
+    API->>G: astream(initial_state, thread config)
+    G->>L: classify intent + rewrite with history
+    L-->>G: data_question
+    G-->>UI: event: step (Understood the question)
+    G->>L: select tables from catalog
+    L-->>G: customers, order_items
+    G-->>UI: event: step (Selected 3 tables)
+    loop Self-correction (max 3 attempts)
+        G->>L: generate SQL (+ previous error feedback)
+        L-->>G: SQLDraft
+        G->>Q: validate AST, tables, LIMIT
+        Q-->>G: ok / violation
+        G->>D: execute on read-only connection
+        D-->>G: rows / error
+        G-->>UI: event: step (retry or success)
+    end
+    G->>L: explain result, recommend chart
+    L-->>G: InsightReport
+    G->>G: finalize (save turn to thread memory)
+    G-->>UI: event: step (Wrote insights)
+    API-->>UI: event: result {answer, sql, rows, chart, follow_ups}
+    UI-->>User: Answer, chart, table, SQL, trace
