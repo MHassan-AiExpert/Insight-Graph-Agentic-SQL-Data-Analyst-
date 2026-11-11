@@ -3,17 +3,17 @@ import { Check, ChevronDown, CornerDownLeft, OctagonX, RotateCcw } from "lucide-
 import type { AgentStep } from "../api";
 
 const DATA_STAGES = [
-  { key: "classify_intent", label: "Understand" },
-  { key: "select_tables", label: "Pick tables" },
-  { key: "generate_sql", label: "Write SQL" },
-  { key: "validate_sql", label: "Safety check" },
-  { key: "execute_sql", label: "Run query" },
-  { key: "analyze_results", label: "Explain" },
+  { key: "classify_intent", label: "Understand", short: "Intent" },
+  { key: "select_tables", label: "Pick tables", short: "Tables" },
+  { key: "generate_sql", label: "Write SQL", short: "SQL" },
+  { key: "validate_sql", label: "Safety check", short: "Safety" },
+  { key: "execute_sql", label: "Run query", short: "Run" },
+  { key: "analyze_results", label: "Explain", short: "Explain" },
 ];
 
 const DIRECT_STAGES = [
-  { key: "classify_intent", label: "Understand" },
-  { key: "respond_direct", label: "Reply" },
+  { key: "classify_intent", label: "Understand", short: "Intent" },
+  { key: "respond_direct", label: "Reply", short: "Reply" },
 ];
 
 type NodeState = "pending" | "running" | "done" | "retry" | "blocked" | "error";
@@ -80,7 +80,8 @@ export function Pipeline({ steps, running }: { steps: AgentStep[]; running: bool
                   <div className={`h-px flex-1 ${i === stages.length - 1 ? "bg-transparent" : "bg-grid-strong"}`} />
                 </div>
                 <span className={`text-center text-[11px] leading-tight sm:text-xs ${state === "pending" ? "text-ink-faint" : "text-ink"}`}>
-                  {stage.label}
+                  <span className="sm:hidden">{stage.short}</span>
+                  <span className="hidden sm:inline">{stage.label}</span>
                 </span>
               </div>
             </li>

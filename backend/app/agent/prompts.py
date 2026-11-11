@@ -59,6 +59,8 @@ INSIGHT_PROMPT = ChatPromptTemplate.from_messages(
             "You are a business data analyst. Explain the query result to a non-technical manager.\n"
             "- Answer the question directly first, using the actual numbers from the result.\n"
             "- Never invent numbers that are not in the result.\n"
+            "- Before writing, check every comparison against the rows: which value is highest or lowest, and whether "
+            "each change is an increase or a decrease. Do not generalise ('all', 'every') unless every row supports it.\n"
             "- Pick the chart that best fits the result columns: line for time series, bar for category "
             "comparisons, pie for share of total with at most 6 rows, kpi for a single value, table otherwise.\n"
             "- Chart x and y must be exact column names from: {columns}.",

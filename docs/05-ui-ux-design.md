@@ -106,7 +106,7 @@ Fonts are self-hosted through Fontsource, so the app works offline and inside pr
 |------------|--------|
 | ≥ 1024 px | Fixed 288 px sidebar plus conversation column |
 | 640–1023 px | Sidebar becomes a drawer; starter questions in two columns |
-| < 640 px | Single column; pipeline labels shrink; table scrolls horizontally |
+| < 640 px | Single column; pipeline uses short labels (Intent, Tables, SQL, Safety, Run, Explain); table scrolls horizontally |
 
 ## 9. Screens
 
