@@ -67,7 +67,9 @@ Question: *"Who are the top 10 customers by lifetime value?"*
 4. `generate_sql` (attempt 2) sees the error, uses `c.name` and adds segment and region.
 5. The query validates and returns 10 rows; `analyze_results` writes the answer and a bar chart.
 
-The UI shows "Self-corrected 1 time" and lists the error under "How it was built" (see `docs/screenshots/03b-self-correction-details.png`).
+The UI shows "Self-corrected 1 time" and lists the error under "How it was built".
+
+The same loop was observed during live testing with Groq. For "What share of orders comes from each sales channel?", the first query failed with `near "to": syntax error`. The agent rewrote it and answered correctly 0.8 s later (see `docs/screenshots/03-self-correction-trace.png`).
 
 ## 3. How it was built
 

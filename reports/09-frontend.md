@@ -89,7 +89,7 @@ An analyst workspace where a business user asks questions, watches the agent wor
 | E2E-05 | Copy SQL puts the query on the clipboard; the button changes to "Copied" | ✅ Pass |
 | E2E-06 | API unreachable → readable error inside the card | ✅ Pass |
 | E2E-07 | Desktop layout at 1440 px: sidebar, schema explorer, answer cards | ✅ Pass (see `docs/screenshots`) |
-| E2E-08 | Mobile layout at 390 px: drawer menu, chart and scrollable table in the answer card | ✅ Pass (see `10-mobile-home.png`, `11-mobile-answer.png`) |
+| E2E-08 | Mobile layout at 390 px: drawer menu, chart and scrollable table in the answer card | ✅ Pass (see `12-mobile-home.png`, `13-mobile-answer.png`) |
 
 | FE-18 | `chartData` › pivots long results | `(region, year, revenue)` → one series per year | ✅ Pass |
 | FE-19 | `chartData` › keeps wide results | Wide rows unchanged | ✅ Pass |

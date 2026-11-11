@@ -256,31 +256,31 @@ Rendered PNG versions of all diagrams, including a deployment diagram and the gr
 
 ## Screenshots
 
-These screens were captured from the full application running the golden evaluation scenarios in [`backend/tests/fixtures`](backend/tests/fixtures) against the sample database. The SQL, row counts and timings shown are real query results.
+All screens below were captured from the running application answering live questions with Groq (`openai/gpt-oss-120b`) against the sample database. Every answer, SQL query, chart and timing is real output.
 
 | Home | Answer with chart |
 |---|---|
 | ![Home](docs/screenshots/01-home.png) | ![Revenue by region](docs/screenshots/02b-revenue-answer-card.png) |
 
-| Self-correction (reasoning trace) | Self-correction (how it was built) |
+| Self-correction: the first SQL failed and the agent fixed it | Follow-up question using conversation memory |
 |---|---|
-| ![Trace](docs/screenshots/03-self-correction-trace.png) | ![Details](docs/screenshots/03b-self-correction-details.png) |
+| ![Self-correction trace](docs/screenshots/03-self-correction-trace.png) | ![Follow-up](docs/screenshots/06-follow-up-memory.png) |
 
-| Time-series trend | Generated SQL with grouped bars |
+| Year-over-year comparison with generated SQL | Monthly trend |
 |---|---|
-| ![Monthly trend](docs/screenshots/04-monthly-trend.png) | ![SQL](docs/screenshots/05-generated-sql.png) |
+| ![Q3 comparison and SQL](docs/screenshots/05-q3-comparison-sql.png) | ![Monthly trend](docs/screenshots/04-monthly-trend.png) |
 
-| Follow-up with memory | Destructive request blocked |
+| Ranking with full results table | Margin analysis (self-corrected) |
 |---|---|
-| ![Follow-up](docs/screenshots/06-follow-up-memory.png) | ![Safety](docs/screenshots/07-safety-guard.png) |
+| ![Top customers](docs/screenshots/09-top-customers.png) | ![Gross margin](docs/screenshots/10-gross-margin.png) |
 
-| Share of total | Margin analysis |
+| Share of orders by channel | Free-form question: return rate by region |
 |---|---|
-| ![Channel share](docs/screenshots/08-channel-share.png) | ![Gross margin](docs/screenshots/09-gross-margin-table.png) |
+| ![Channel share](docs/screenshots/08-channel-share.png) | ![Return rate](docs/screenshots/11-return-rate.png) |
 
-| Mobile home | Mobile answer |
+| Destructive request blocked | Mobile |
 |---|---|
-| <img src="docs/screenshots/10-mobile-home.png" width="280"> | <img src="docs/screenshots/11-mobile-answer.png" width="280"> |
+| ![Safety guard](docs/screenshots/07-safety-guard.png) | <img src="docs/screenshots/12-mobile-home.png" width="230"> <img src="docs/screenshots/13-mobile-answer.png" width="230"> |
 
 ## Tech stack
 

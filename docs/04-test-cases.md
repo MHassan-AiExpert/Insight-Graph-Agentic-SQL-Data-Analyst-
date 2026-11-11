@@ -92,7 +92,7 @@ ruff check .
 | UI-03 | Follow-up shows "Interpreted as …" | Pass, `screenshots/06-follow-up-memory.png` |
 | UI-04 | Results table sorts by column and downloads CSV | Pass |
 | UI-05 | Copy SQL button copies the query | Pass |
-| UI-06 | Layout works at 390 px (mobile) with a collapsible schema drawer | Pass, `screenshots/10-mobile-home.png`, `11-mobile-answer.png` |
+| UI-06 | Layout works at 390 px (mobile) with a collapsible schema drawer | Pass, `screenshots/12-mobile-home.png`, `13-mobile-answer.png` |
 | UI-07 | Keyboard: Enter sends, Shift+Enter adds a new line, visible focus rings | Pass |
 | UI-08 | API down: a clear error message is shown in the answer card | Pass |
 

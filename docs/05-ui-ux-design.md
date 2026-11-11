@@ -114,11 +114,13 @@ Fonts are self-hosted through Fontsource, so the app works offline and inside pr
 |--------|------|
 | Home / empty state | `screenshots/01-home.png` |
 | Answer with bar chart | `screenshots/02-revenue-by-region.png`, `02b-revenue-answer-card.png` |
-| Self-correction trace and details | `screenshots/03-self-correction-trace.png`, `03b-self-correction-details.png` |
-| Time-series line chart | `screenshots/04-monthly-trend.png` |
-| SQL tab with grouped bars | `screenshots/05-generated-sql.png` |
-| Follow-up with memory and KPI tiles | `screenshots/06-follow-up-memory.png` |
+| Self-correction with reasoning trace and details | `screenshots/03-self-correction-trace.png` |
+| Monthly trend | `screenshots/04-monthly-trend.png` |
+| SQL tab with grouped bars (year-over-year) | `screenshots/05-q3-comparison-sql.png` |
+| Follow-up with memory and KPI tile | `screenshots/06-follow-up-memory.png` |
 | Blocked destructive request | `screenshots/07-safety-guard.png` |
-| Donut chart | `screenshots/08-channel-share.png` |
-| Percentage metrics | `screenshots/09-gross-margin-table.png` |
-| Mobile | `screenshots/10-mobile-home.png`, `11-mobile-answer.png` |
+| Share of orders by channel | `screenshots/08-channel-share.png` |
+| Ranking with full results table | `screenshots/09-top-customers.png` |
+| Percentage metrics (self-corrected) | `screenshots/10-gross-margin.png` |
+| Free-form question | `screenshots/11-return-rate.png` |
+| Mobile | `screenshots/12-mobile-home.png`, `13-mobile-answer.png` |
