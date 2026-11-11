@@ -46,6 +46,11 @@ class ChartSpec(BaseModel):
     x: str | None = Field(default=None, description="Result column used for the x-axis / labels.")
     y: list[str] = Field(default_factory=list, description="Numeric result column(s) to plot.")
     title: str = Field(default="", description="Short chart title.")
+    series: str | None = Field(
+        default=None,
+        description="Optional column that splits the data into multiple lines/bars, e.g. 'year' when rows are "
+        "(region, year, revenue). Leave empty when each row already holds one x value.",
+    )
 
 
 class InsightReport(BaseModel):

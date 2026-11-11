@@ -43,7 +43,8 @@ SQL_PROMPT = ChatPromptTemplate.from_messages(
             "- Dates are stored as ISO text (YYYY-MM-DD). {date_hint}\n"
             "- Round money to 2 decimals. Order results meaningfully. Return at most {max_rows} rows.\n"
             "- For time series return one row per period, sorted ascending.\n\n"
-            "Business definitions:\n{business_rules}\n\n"
+            "Business definitions (apply them exactly, including status filters, unless the question asks otherwise):\n"
+            "{business_rules}\n\n"
             "Schema:\n{schema}\n\n"
             "Conversation history:\n{history}",
         ),

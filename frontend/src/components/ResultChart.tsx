@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import type { ChartSpec } from "../api";
 import { formatNumber, humanize } from "../format";
+import { toChartData } from "../chartData";
 
 const SERIES = ["#2d5bd8", "#2e7d52", "#c97f0c", "#7a4fc2", "#b8402b", "#1f8a9c"];
 
@@ -43,13 +44,15 @@ export function ResultChart({ spec, columns, rows }: Props) {
     );
   }
 
-  const data = rows.slice(0, 60).map((row) => Object.fromEntries(columns.map((c, i) => [c, row[i]])));
+  const { data, keys, valueColumn } = toChartData(spec, columns, rows);
+  const pivoted = Boolean(spec.series);
   const x = spec.x ?? columns[0];
   const tick = { fill: "#4a5468", fontSize: 12 };
-  const yFormatter = (v: number) => formatNumber(v, spec.y[0], true);
+  const yFormatter = (v: number) => formatNumber(v, valueColumn, true);
+  const label = (name: string) => (pivoted ? name : humanize(name));
   const tooltip = (
     <Tooltip
-      formatter={(value, name) => [formatNumber(value as number, String(name)), humanize(String(name))]}
+      formatter={(value, name) => [formatNumber(value as number, pivoted ? valueColumn : String(name)), label(String(name))]}
       contentStyle={{ borderRadius: 10, border: "1px solid #dde3dc", fontSize: 13 }}
     />
   );
@@ -63,8 +66,8 @@ export function ResultChart({ spec, columns, rows }: Props) {
             <XAxis dataKey={x} tick={tick} tickLine={false} axisLine={{ stroke: "#c5cec4" }} minTickGap={16} />
             <YAxis tick={tick} tickLine={false} axisLine={false} tickFormatter={yFormatter} width={64} />
             {tooltip}
-            {spec.y.length > 1 && <Legend formatter={(v) => humanize(String(v))} />}
-            {spec.y.map((col, i) => (
+            {keys.length > 1 && <Legend formatter={(v) => label(String(v))} />}
+            {keys.map((col, i) => (
               <Line key={col} type="monotone" dataKey={col} stroke={SERIES[i % SERIES.length]} strokeWidth={2.4} dot={{ r: 2.5 }} activeDot={{ r: 5 }} />
             ))}
           </LineChart>
@@ -72,7 +75,7 @@ export function ResultChart({ spec, columns, rows }: Props) {
           <PieChart>
             {tooltip}
             <Legend formatter={(v) => <span className="text-ink-soft">{String(v)}</span>} />
-            <Pie data={data} dataKey={spec.y[0]} nameKey={x} innerRadius="52%" outerRadius="82%" paddingAngle={2} stroke="none">
+            <Pie data={data} dataKey={keys[0]} nameKey={x} innerRadius="52%" outerRadius="82%" paddingAngle={2} stroke="none">
               {data.map((_, i) => (
                 <Cell key={i} fill={SERIES[i % SERIES.length]} />
               ))}
@@ -84,8 +87,8 @@ export function ResultChart({ spec, columns, rows }: Props) {
             <XAxis dataKey={x} tick={tick} tickLine={false} axisLine={{ stroke: "#c5cec4" }} interval={0} angle={data.length > 6 ? -25 : 0} textAnchor={data.length > 6 ? "end" : "middle"} height={data.length > 6 ? 70 : 30} />
             <YAxis tick={tick} tickLine={false} axisLine={false} tickFormatter={yFormatter} width={64} />
             {tooltip}
-            {spec.y.length > 1 && <Legend formatter={(v) => humanize(String(v))} />}
-            {spec.y.map((col, i) => (
+            {keys.length > 1 && <Legend formatter={(v) => label(String(v))} />}
+            {keys.map((col, i) => (
               <Bar key={col} dataKey={col} fill={SERIES[i % SERIES.length]} radius={[5, 5, 0, 0]} maxBarSize={56} />
             ))}
           </BarChart>

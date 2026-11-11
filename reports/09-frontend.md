@@ -22,6 +22,7 @@ An analyst workspace where a business user asks questions, watches the agent wor
 | `components/SqlViewer.tsx` | Lightweight SQL syntax highlighting and Copy SQL |
 | `components/Sidebar.tsx` | Brand, New conversation, schema explorer (row counts, PK/FK icons), model status |
 | `components/Composer.tsx` | Auto-growing input; Enter sends, Shift+Enter adds a new line; Stop while streaming |
+| `chartData.ts` | Pivots long-format results into one series per value for Recharts |
 | `format.ts` | Labels (`total_revenue` → "Total revenue"), currency, percentage and compact axis formatting |
 
 ### 2.2 Streaming client (`askStream`)
@@ -90,4 +91,7 @@ An analyst workspace where a business user asks questions, watches the agent wor
 | E2E-07 | Desktop layout at 1440 px: sidebar, schema explorer, answer cards | ✅ Pass (see `docs/screenshots`) |
 | E2E-08 | Mobile layout at 390 px: drawer menu, chart and scrollable table in the answer card | ✅ Pass (see `10-mobile-home.png`, `11-mobile-answer.png`) |
 
-**Result: 17 / 17 unit tests and 8 / 8 browser checks passed.**
+| FE-18 | `chartData` › pivots long results | `(region, year, revenue)` → one series per year | ✅ Pass |
+| FE-19 | `chartData` › keeps wide results | Wide rows unchanged | ✅ Pass |
+
+**Result: 19 / 19 unit tests and 8 / 8 browser checks passed.**

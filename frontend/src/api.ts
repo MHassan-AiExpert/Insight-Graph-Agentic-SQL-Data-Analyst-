@@ -14,6 +14,7 @@ export interface ChartSpec {
   x: string | null;
   y: string[];
   title: string;
+  series?: string | null;
 }
 
 export interface AttemptRecord {

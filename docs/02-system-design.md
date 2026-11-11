@@ -139,7 +139,7 @@ Business definitions such as revenue, gross profit and AOV are configured centra
 - **`GroqLLM`** wraps `langchain_groq.ChatGroq` with `with_structured_output(schema)`. Runnables are cached per schema. Errors are converted to `LLMError` and surfaced as an SSE `error` event.
 - **`ScriptedLLM`** replays predefined responses per task or per question. The test suite and golden scenarios use it, which makes CI deterministic and keyless.
 
-Model, temperature and timeout are configured through environment variables. Supported Groq production models include `llama-3.3-70b-versatile` (default) and `openai/gpt-oss-120b`.
+Model, temperature and timeout are configured through environment variables. The default model is `openai/gpt-oss-120b` with low reasoning effort (fast and accurate for SQL); `llama-3.3-70b-versatile` and other Groq models with tool calling also work.
 
 ## 8. Configuration
 
@@ -147,7 +147,8 @@ Model, temperature and timeout are configured through environment variables. Sup
 |----------|---------|---------|
 | `LLM_PROVIDER` | `groq` | `groq` or `scripted` |
 | `GROQ_API_KEY` | — | Groq API key |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Model id |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Model id |
+| `LLM_REASONING_EFFORT` | `low` | Reasoning effort for gpt-oss models |
 | `DATABASE_URL` | `sqlite:///backend/data/insightgraph.db` | Any SQLAlchemy URL |
 | `MAX_SQL_ATTEMPTS` | `3` | Self-correction budget |
 | `MAX_RESULT_ROWS` | `500` | Enforced row limit |

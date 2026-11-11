@@ -6,7 +6,7 @@ def test_defaults_are_safe(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     s = Settings(_env_file=None, groq_api_key=None)
     assert s.llm_provider == "groq"
-    assert s.groq_model == "llama-3.3-70b-versatile"
+    assert s.groq_model == "openai/gpt-oss-120b"
     assert s.max_sql_attempts == 3
     assert s.max_result_rows == 500
     assert s.query_timeout_seconds == 10.0
@@ -15,10 +15,10 @@ def test_defaults_are_safe(monkeypatch):
 
 def test_environment_overrides(monkeypatch):
     monkeypatch.setenv("MAX_SQL_ATTEMPTS", "5")
-    monkeypatch.setenv("GROQ_MODEL", "openai/gpt-oss-120b")
+    monkeypatch.setenv("GROQ_MODEL", "llama-3.3-70b-versatile")
     s = Settings(_env_file=None)
     assert s.max_sql_attempts == 5
-    assert s.groq_model == "openai/gpt-oss-120b"
+    assert s.groq_model == "llama-3.3-70b-versatile"
 
 
 def test_cors_origin_list_is_parsed():

@@ -47,7 +47,7 @@ def test_groq_builds_structured_runnable_without_network():
 
 
 def test_chart_spec_defaults():
-    assert ChartSpec(type="bar").model_dump() == {"type": "bar", "x": None, "y": [], "title": ""}
+    assert ChartSpec(type="bar").model_dump() == {"type": "bar", "x": None, "y": [], "title": "", "series": None}
 
 
 def test_prompts_render_with_all_variables():
@@ -65,3 +65,10 @@ def test_prompts_render_with_all_variables():
     )
     assert "SELECT" in sql[0].content and "Question: q" in sql[1].content
     assert len(INSIGHT_PROMPT.format_messages(columns="[]", question="q", sql="s", row_count=1, shown=1, rows="r")) == 2
+
+
+def test_reasoning_effort_only_applies_to_reasoning_models():
+    oss = GroqLLM(model="openai/gpt-oss-120b", api_key="gsk_test", reasoning_effort="low")
+    llama = GroqLLM(model="llama-3.3-70b-versatile", api_key="gsk_test", reasoning_effort="low")
+    assert oss._chat.reasoning_effort == "low"
+    assert llama._chat.reasoning_effort is None

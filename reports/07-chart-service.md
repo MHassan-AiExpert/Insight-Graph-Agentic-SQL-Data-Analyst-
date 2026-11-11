@@ -33,6 +33,12 @@ A column is numeric when every non-null value in the first 50 rows is an `int` o
 5. A `pie` with more than 8 slices becomes a **bar**, because pies are unreadable with many slices.
 6. At most 3 series are kept.
 
+### 2.4 Long-format results: `detect_series`
+
+Models often return comparisons as one row per category and period, for example `(region, year, revenue)`. Plotted directly, each region would appear twice on the axis. `detect_series` spots this shape: the x value repeats, and another text (or time-like) column has 2–6 distinct values that make every row unique. It returns that column as `series`.
+
+The frontend (`frontend/src/chartData.ts`) then pivots the rows so each year becomes its own coloured bar or line, with a legend. This issue was found during live testing with Groq and fixed with tests on both sides.
+
 ## 3. How it was built
 
 | Decision | Why |
@@ -55,7 +61,11 @@ File: `backend/tests/test_charts.py`
 | CH-05 | `test_invalid_model_chart_falls_back` | x = `does_not_exist` | Replaced: bar with x = region | ✅ Pass |
 | CH-06 | `test_pie_with_many_slices_becomes_bar` | Pie with 12 rows | bar | ✅ Pass |
 | CH-07 | `test_non_numeric_y_is_dropped` | y = [region, revenue] | y = [revenue] | ✅ Pass |
+| CH-08 | `test_long_format_is_split_into_series` | `(region, year, revenue)` with repeated regions | series = year | ✅ Pass |
+| CH-09 | `test_wide_format_has_no_series` | `(region, q3_2025, q3_2026)` | No pivot; two y columns | ✅ Pass |
+| CH-10 | Frontend `chartData` › pivots long results | `(region, year, revenue)` rows | Pivoted into `{region, 2025, 2026}` | ✅ Pass |
+| CH-11 | Frontend `chartData` › keeps wide results | `(region, q3_2025, q3_2026)` rows | Data unchanged | ✅ Pass |
 
 The scenario tests (report 06) also check that the final chart for every golden question uses real columns, and they cover line, bar, multi-series bar, pie and KPI.
 
-**Result: 7 / 7 passed.**
+**Result: 9 / 9 backend and 2 / 2 frontend tests passed.**

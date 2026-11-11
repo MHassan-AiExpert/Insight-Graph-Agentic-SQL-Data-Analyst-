@@ -82,7 +82,7 @@ Details: [System design](02-system-design.md) · [Features](03-system-features.m
 |-------|-----------|-----|
 | Agent orchestration | LangGraph 1.x | Explicit state machine with conditional edges, loops and checkpointed memory |
 | LLM framework | LangChain Core, `langchain-groq` | Prompt templates, structured output (Pydantic), provider abstraction |
-| LLM | Groq — `llama-3.3-70b-versatile` (configurable) | Very low latency inference, which suits a multi-step agent |
+| LLM | Groq — `openai/gpt-oss-120b` (configurable) | Very low latency inference, which suits a multi-step agent |
 | SQL safety | sqlglot | Parses SQL into an AST so rules are enforced on structure, not on fragile regex |
 | Data access | SQLAlchemy 2 | One code path for SQLite and PostgreSQL; schema introspection |
 | API | FastAPI, sse-starlette, Pydantic v2 | Typed endpoints and real-time streaming |

@@ -42,3 +42,20 @@ def test_non_numeric_y_is_dropped():
         [["Europe", 1.0]],
     )
     assert spec["y"] == ["revenue"]
+
+
+def test_long_format_is_split_into_series():
+    columns = ["region", "year", "revenue"]
+    rows = [["Asia", "2025", 1.0], ["Asia", "2026", 2.0], ["Europe", "2025", 3.0], ["Europe", "2026", 4.0]]
+    spec = validate_chart({"type": "bar", "x": "region", "y": ["revenue"], "title": ""}, columns, rows)
+    assert spec["series"] == "year" and spec["y"] == ["revenue"]
+    assert recommend_chart(columns, rows)["series"] == "year"
+
+
+def test_wide_format_has_no_series():
+    spec = validate_chart(
+        {"type": "bar", "x": "region", "y": ["q3_2025", "q3_2026"], "title": ""},
+        ["region", "q3_2025", "q3_2026"],
+        [["Asia", 1.0, 2.0], ["Europe", 3.0, 4.0]],
+    )
+    assert spec["series"] is None and spec["y"] == ["q3_2025", "q3_2026"]

@@ -22,9 +22,11 @@ class Settings(BaseSettings):
     # --- LLM -------------------------------------------------------------
     llm_provider: Literal["groq", "scripted"] = "groq"
     groq_api_key: str | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-120b"
     llm_temperature: float = 0.0
     llm_timeout_seconds: float = 45.0
+    # Only used by reasoning models such as openai/gpt-oss-*: low / medium / high
+    llm_reasoning_effort: str | None = "low"
     scripted_responses_path: Path | None = None
 
     # --- Database --------------------------------------------------------

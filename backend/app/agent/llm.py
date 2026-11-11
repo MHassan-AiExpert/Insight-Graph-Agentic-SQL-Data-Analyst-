@@ -40,13 +40,25 @@ class LLMClient(Protocol):
 class GroqLLM:
     provider = "groq"
 
-    def __init__(self, model: str, api_key: str | None, temperature: float = 0.0, timeout: float = 45.0):
+    def __init__(
+        self,
+        model: str,
+        api_key: str | None,
+        temperature: float = 0.0,
+        timeout: float = 45.0,
+        reasoning_effort: str | None = None,
+    ):
         if not api_key:
             raise LLMError("GROQ_API_KEY is not set. Add it to your .env file.")
         from langchain_groq import ChatGroq
 
         self.model = model
-        self._chat = ChatGroq(model=model, api_key=api_key, temperature=temperature, timeout=timeout, max_retries=2)
+        extra: dict[str, Any] = {}
+        if reasoning_effort and "gpt-oss" in model:
+            extra["reasoning_effort"] = reasoning_effort
+        self._chat = ChatGroq(
+            model=model, api_key=api_key, temperature=temperature, timeout=timeout, max_retries=2, **extra
+        )
         self._runnables: dict[type[BaseModel], Any] = {}
 
     def structured(self, task: str, messages: list[BaseMessage], schema: type[T], *, key: str = "") -> T:
@@ -126,4 +138,5 @@ def get_llm() -> LLMClient:
         api_key=settings.groq_api_key,
         temperature=settings.llm_temperature,
         timeout=settings.llm_timeout_seconds,
+        reasoning_effort=settings.llm_reasoning_effort,
     )

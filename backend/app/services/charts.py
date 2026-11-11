@@ -43,7 +43,40 @@ def recommend_chart(columns: list[str], rows: list[list[Any]], title: str = "") 
         else:
             return {"type": "table", "x": None, "y": [], "title": title}
     chart_type = "line" if _is_time_axis(x, columns, rows) and len(rows) > 2 else "bar"
-    return {"type": chart_type, "x": x, "y": nums[:3], "title": title}
+    return _with_series({"type": chart_type, "x": x, "y": nums[:3], "title": title}, columns, rows)
+
+
+def detect_series(x: str | None, y: list[str], columns: list[str], rows: list[list[Any]]) -> str | None:
+    """Detect "long" results such as (region, year, revenue), where each x value
+    repeats once per series. Returns the column to split into series, or None."""
+    if not x or x not in columns or not y or not rows:
+        return None
+    xi = columns.index(x)
+    x_values = [r[xi] for r in rows]
+    if len(set(x_values)) == len(x_values):
+        return None
+    nums = set(numeric_columns(columns, rows))
+    for col in columns:
+        if col == x or col in y:
+            continue
+        if col in nums and not TIME_COLUMN.search(col):
+            continue
+        ci = columns.index(col)
+        series_values = {r[ci] for r in rows}
+        pairs = {(r[xi], r[ci]) for r in rows}
+        if 1 < len(series_values) <= 6 and len(pairs) == len(rows):
+            return col
+    return None
+
+
+def _with_series(spec: dict[str, Any], columns: list[str], rows: list[list[Any]]) -> dict[str, Any]:
+    series = None
+    if spec["type"] in ("bar", "line"):
+        series = detect_series(spec["x"], spec["y"], columns, rows)
+    spec["series"] = series
+    if series:
+        spec["y"] = spec["y"][:1]
+    return spec
 
 
 def validate_chart(spec: dict[str, Any] | None, columns: list[str], rows: list[list[Any]]) -> dict[str, Any]:
@@ -65,4 +98,4 @@ def validate_chart(spec: dict[str, Any] | None, columns: list[str], rows: list[l
         return recommend_chart(columns, rows, title)
     if chart_type == "pie" and len(rows) > 8:
         chart_type = "bar"
-    return {"type": chart_type, "x": x, "y": y[:3], "title": title}
+    return _with_series({"type": chart_type, "x": x, "y": y[:3], "title": title}, columns, rows)

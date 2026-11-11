@@ -28,12 +28,12 @@ Only the language model is replaced. The graph, routing, guard, database, chart 
 
 | Level | Suites | Tests |
 |-------|--------|------:|
-| Unit | config, seed, SQL guard, database, charts, LLM layer | 60 |
+| Unit | config, seed, SQL guard, database, charts, LLM layer | 63 |
 | Integration | graph, API | 19 |
 | Regression | golden scenarios | 10 |
-| Frontend unit and component | format, SSE client, Pipeline, ResultsTable, Composer | 17 |
+| Frontend unit and component | format, chart data, SSE client, Pipeline, ResultsTable, Composer | 19 |
 | Browser checks | Playwright on the running app | 8 |
-| **Total** | | **114** |
+| **Total** | | **119** |
 
 ## 3. Continuous integration (`.github/workflows/ci.yml`)
 
@@ -80,8 +80,8 @@ docker compose up --build
 
 | Run | Result |
 |-----|--------|
-| `pytest` (local) | **89 passed** |
-| `npm test` (local) | **17 passed** |
+| `pytest` (local) | **92 passed** |
+| `npm test` (local) | **19 passed** |
 | `ruff check` / `ruff format --check` | Clean |
 | `tsc -b && vite build` | Clean |
 | Browser checks | **8 / 8 passed** |

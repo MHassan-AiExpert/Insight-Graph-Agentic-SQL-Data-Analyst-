@@ -4,7 +4,7 @@
 
 **Ask your database a question in plain English and get back verified SQL, a chart and a clear explanation, with every reasoning step shown.**
 
-Built with **LangGraph**, **LangChain**, **FastAPI**, **React + TypeScript** and **Groq (Llama 3.3 70B)**.
+Built with **LangGraph**, **LangChain**, **FastAPI**, **React + TypeScript** and **Groq (GPT-OSS 120B)**.
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.x-1C3C3C)
@@ -12,7 +12,7 @@ Built with **LangGraph**, **LangChain**, **FastAPI**, **React + TypeScript** and
 ![FastAPI](https://img.shields.io/badge/FastAPI-SSE-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-106%20passing-2E7D52)
+![Tests](https://img.shields.io/badge/tests-111%20passing-2E7D52)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ![InsightGraph answering "What is total revenue by region?"](docs/screenshots/02-revenue-by-region.png)
@@ -72,7 +72,7 @@ Every step streams to the UI in real time, so users can see exactly how each ans
 | ⚡ | **Live streaming** | Server-Sent Events emit each node as it finishes; the UI animates a six-stage pipeline |
 | 🔍 | **Full transparency** | Reasoning trace with timings, SQL viewer, assumptions, tables used and every fixed error |
 | 📥 | **Results workspace** | Sortable, paginated table with currency and percentage formatting and CSV export |
-| 🧪 | **Deterministic test suite** | 106 automated tests (89 backend + 17 frontend), including golden business scenarios, that run without network or API key |
+| 🧪 | **Deterministic test suite** | 111 automated tests (92 backend + 19 frontend), including golden business scenarios, that run without network or API key |
 | 🐳 | **One-command deploy** | Multi-stage Docker image serving the API and the React app on one port |
 
 ## How it works
@@ -103,7 +103,7 @@ flowchart TB
         LLMC[LLM client]
     end
 
-    GROQ[[Groq API: llama-3.3-70b-versatile]]
+    GROQ[[Groq API: openai/gpt-oss-120b]]
     DB[(Read-only database: SQLite / PostgreSQL)]
 
     SSE <-->|HTTP + Server-Sent Events| API
@@ -288,7 +288,7 @@ These screens were captured from the full application running the golden evaluat
 |-------|-----------|
 | Agent orchestration | LangGraph 1.x (StateGraph, conditional edges, checkpointer) |
 | LLM framework | LangChain Core (prompt templates, structured output), `langchain-groq` |
-| LLM | Groq: `llama-3.3-70b-versatile` (configurable, e.g. `openai/gpt-oss-120b`) |
+| LLM | Groq: `openai/gpt-oss-120b` with low reasoning effort (configurable, e.g. `llama-3.3-70b-versatile`) |
 | SQL safety | sqlglot (AST parsing and transpiling) |
 | Data access | SQLAlchemy 2 (SQLite, PostgreSQL) |
 | API | FastAPI, sse-starlette, Pydantic v2, pydantic-settings |
@@ -350,7 +350,8 @@ All settings are environment variables (see [`.env.example`](.env.example)).
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GROQ_API_KEY` | — | Groq API key (required for `groq`) |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Any Groq chat model with tool calling |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Any Groq chat model with tool calling |
+| `LLM_REASONING_EFFORT` | `low` | Reasoning effort for gpt-oss models (`low`, `medium`, `high`) |
 | `LLM_PROVIDER` | `groq` | `groq`, or `scripted` for deterministic evaluation runs |
 | `DATABASE_URL` | bundled SQLite | Any SQLAlchemy URL, e.g. `postgresql+psycopg://…` |
 | `MAX_SQL_ATTEMPTS` | `3` | Self-correction budget |
@@ -401,8 +402,8 @@ curl -N -X POST http://localhost:8000/api/ask/stream \
 ## Testing
 
 ```bash
-cd backend && pytest          # 89 passed
-cd frontend && npm test       # 17 passed
+cd backend && pytest          # 92 passed
+cd frontend && npm test       # 19 passed
 ```
 
 | Suite | Tests | Covers |
@@ -411,12 +412,12 @@ cd frontend && npm test       # 17 passed
 | `test_database.py` | 9 | Introspection, read-only connection, timeout, readable errors |
 | `test_seed.py` | 5 | Deterministic data, counts, integrity, business constraints |
 | `test_config.py` | 4 | Defaults, environment overrides, CORS parsing, business rules |
-| `test_llm.py` | 8 | Scripted provider, schema validation, Groq client setup, prompt rendering |
-| `test_charts.py` | 7 | Chart recommendation and validation |
+| `test_llm.py` | 9 | Scripted provider, schema validation, Groq client setup, reasoning effort, prompt rendering |
+| `test_charts.py` | 9 | Chart recommendation, validation and long-format series detection |
 | `test_graph.py` | 11 | Routing, self-correction (execution, validation, empty result), give-up, memory, thread isolation |
 | `test_api.py` | 8 | REST + SSE contract, validation, history |
 | `test_scenarios.py` | 10 | Golden business scenarios end-to-end against the real database |
-| `frontend/src/__tests__` | 17 | Formatting, SSE stream parsing, Pipeline, ResultsTable and Composer components |
+| `frontend/src/__tests__` | 19 | Formatting, chart data pivoting, SSE stream parsing, Pipeline, ResultsTable and Composer components |
 
 The backend suite uses a scripted LLM that replays structured responses. The real graph, guard and database code paths run on every test, and CI needs no API key. The full test plan is in [`docs/04-test-cases.md`](docs/04-test-cases.md), and every module has its own report with its test cases in [`reports/`](reports).
 
@@ -442,7 +443,7 @@ The backend suite uses a scripted LLM that replays structured responses. The rea
 │   │   │   └── charts.py       # Chart validation + fallback recommender
 │   │   ├── config.py           # pydantic-settings configuration
 │   │   └── main.py             # FastAPI app, CORS, SPA hosting
-│   ├── tests/                  # 89 tests + golden scenario fixtures
+│   ├── tests/                  # 92 tests + golden scenario fixtures
 │   ├── requirements.txt
 │   └── pyproject.toml
 ├── frontend/
@@ -451,7 +452,7 @@ The backend suite uses a scripted LLM that replays structured responses. The rea
 │       ├── api.ts              # Typed API + SSE client
 │       ├── format.ts           # Number, currency and percent formatting
 │       ├── components/         # Pipeline, AnswerSheet, ResultChart, ResultsTable, SqlViewer, Sidebar, Composer
-│       └── __tests__/          # 17 Vitest + Testing Library tests
+│       └── __tests__/          # 19 Vitest + Testing Library tests
 ├── docs/
 │   ├── 01-project-document.md
 │   ├── 02-system-design.md

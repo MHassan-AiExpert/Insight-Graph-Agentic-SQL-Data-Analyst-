@@ -25,7 +25,7 @@ Nodes never handle raw text: they call `structured("sql", messages, SQLDraft)` a
 
 ### 2.2 GroqLLM (production)
 
-1. Creates `ChatGroq(model, temperature=0, timeout, max_retries=2)`.
+1. Creates `ChatGroq(model, temperature=0, timeout, max_retries=2)`, adding `reasoning_effort` (default `low`) for reasoning models such as `openai/gpt-oss-120b`.
 2. For each schema, builds `chat.with_structured_output(schema)` once and caches it. LangChain turns the Pydantic model into a tool/function definition, and Groq returns arguments that are parsed back into the model.
 3. Any provider error becomes `LLMError("<model> failed during '<task>': …")`. The API turns this into an SSE `error` event.
 4. A missing API key fails immediately with a clear message.
@@ -46,7 +46,7 @@ Replays payloads instead of calling a model:
 | `IntentDecision` | `intent` ∈ {data_question, small_talk, unsafe, out_of_scope}, `standalone_question`, `reason` | `classify_intent` |
 | `TableSelection` | `tables[]`, `reason` | `select_tables` |
 | `SQLDraft` | `sql`, `reasoning`, `assumptions[]` | `generate_sql` |
-| `ChartSpec` | `type` ∈ {bar, line, pie, kpi, table}, `x`, `y[]`, `title` | inside `InsightReport` |
+| `ChartSpec` | `type` ∈ {bar, line, pie, kpi, table}, `x`, `y[]`, `title`, optional `series` | inside `InsightReport` |
 | `InsightReport` | `answer`, `key_findings[]`, `chart`, `follow_up_questions[]` | `analyze_results` |
 
 Field descriptions double as instructions to the model (for example, when to choose a pie chart).
@@ -67,6 +67,7 @@ Field descriptions double as instructions to the model (for example, when to cho
 | Structured output everywhere | Parsing free text is fragile. Pydantic validation turns a malformed model answer into a clear error instead of a silent bug. |
 | Provider protocol | Groq was chosen for very low latency, which matters in a 4-call agent, but swapping to OpenAI or Gemini only needs a new class with one method |
 | Temperature 0 | SQL generation should be repeatable |
+| Default model `openai/gpt-oss-120b` with low reasoning effort | It produced correct SQL on the first attempt in live testing; low effort keeps answers fast while keeping the quality of a reasoning model |
 | Scripted provider in the codebase | CI runs the real graph, guard and database on every push without network or keys; the same mechanism runs the golden evaluation scenarios |
 | Error feedback in `SQL_PROMPT` | Self-correction works because the model sees its previous SQL and the exact failure reason |
 
@@ -84,10 +85,11 @@ File: `backend/tests/test_llm.py`
 | LLM-06 | `test_groq_builds_structured_runnable_without_network` | The Groq client and structured runnable are created with the correct model | ✅ Pass |
 | LLM-07 | `test_chart_spec_defaults` | `ChartSpec(type="bar")` has safe defaults | ✅ Pass |
 | LLM-08 | `test_prompts_render_with_all_variables` | All four prompt templates render with their variables (catches missing or misspelt placeholders) | ✅ Pass |
+| LLM-09 | `test_reasoning_effort_only_applies_to_reasoning_models` | `reasoning_effort="low"` is passed to `openai/gpt-oss-*` models and ignored for Llama models | ✅ Pass |
 
 The layer is also exercised by every graph, API and scenario test (40+ structured calls per run).
 
-**Result: 8 / 8 passed.**
+**Result: 9 / 9 passed.**
 
 ## 5. Note on live model testing
 

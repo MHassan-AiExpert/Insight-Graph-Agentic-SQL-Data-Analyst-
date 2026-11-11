@@ -20,7 +20,7 @@ Provides one typed, validated source of truth for all runtime settings: LLM prov
 
 | Group | Fields |
 |-------|--------|
-| LLM | `llm_provider`, `groq_api_key`, `groq_model`, `llm_temperature`, `llm_timeout_seconds`, `scripted_responses_path` |
+| LLM | `llm_provider`, `groq_api_key`, `groq_model`, `llm_temperature`, `llm_timeout_seconds`, `llm_reasoning_effort`, `scripted_responses_path` |
 | Database | `database_url`, `query_timeout_seconds`, `max_result_rows`, `sample_rows_per_table`, `business_rules` |
 | Agent | `max_sql_attempts`, `history_turns`, `rows_for_analysis` |
 | API | `cors_origins`, `frontend_dist` |
@@ -41,8 +41,8 @@ File: `backend/tests/test_config.py`
 
 | ID | Test | What it checks | Result |
 |----|------|----------------|--------|
-| CFG-01 | `test_defaults_are_safe` | With no environment, the provider is `groq`, the model is `llama-3.3-70b-versatile`, the limits are 3 attempts / 500 rows / 10 s, and the database points to the bundled SQLite file | ✅ Pass |
-| CFG-02 | `test_environment_overrides` | `MAX_SQL_ATTEMPTS=5` and `GROQ_MODEL=openai/gpt-oss-120b` override the defaults and are converted to the right types | ✅ Pass |
+| CFG-01 | `test_defaults_are_safe` | With no environment, the provider is `groq`, the model is `openai/gpt-oss-120b`, the limits are 3 attempts / 500 rows / 10 s, and the database points to the bundled SQLite file | ✅ Pass |
+| CFG-02 | `test_environment_overrides` | `MAX_SQL_ATTEMPTS=5` and `GROQ_MODEL=llama-3.3-70b-versatile` override the defaults and are converted to the right types | ✅ Pass |
 | CFG-03 | `test_cors_origin_list_is_parsed` | `" http://a.com, ,http://b.com "` becomes `["http://a.com", "http://b.com"]` (spaces and empty entries removed) | ✅ Pass |
 | CFG-04 | `test_business_rules_define_core_metrics` | The default rules define revenue, gross profit, average order value and quarters | ✅ Pass |
 

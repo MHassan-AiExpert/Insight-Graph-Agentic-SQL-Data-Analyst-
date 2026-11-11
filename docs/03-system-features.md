@@ -47,7 +47,7 @@
 - Schema explorer sidebar with row counts and PK/FK markers.
 
 ## F10. Engineering quality
-- 106 automated tests (89 backend: unit, graph, API and golden scenarios; 17 frontend component and client tests) that run without network or API key.
+- 111 automated tests (92 backend: unit, graph, API and golden scenarios; 19 frontend component and client tests) that run without network or API key.
 - GitHub Actions CI: lint, backend tests, frontend tests, type-check and build, Docker build.
 - Single-command deployment with Docker Compose; FastAPI serves both the API and the built React app.
 - Pluggable LLM provider and database through environment variables.
