@@ -300,7 +300,7 @@ These screens were captured from the full application running the golden evaluat
 
 ### Prerequisites
 
-- Python 3.11+ and Node.js 20+, **or** Docker
+- Python 3.11+ and Node.js 22+, **or** Docker
 - A free Groq API key from [console.groq.com/keys](https://console.groq.com/keys)
 
 ### Option A: Docker (one command)

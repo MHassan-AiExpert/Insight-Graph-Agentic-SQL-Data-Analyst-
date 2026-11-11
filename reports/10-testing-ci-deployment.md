@@ -42,7 +42,7 @@ Runs on every push to `main` and on pull requests.
 | Job | Steps |
 |-----|-------|
 | **Backend** | Python 3.12 → `pip install -r requirements-dev.txt` → `ruff check` → `ruff format --check` → `pytest` |
-| **Frontend** | Node 20 → `npm ci` → `npm test` (Vitest) → `npm run build` (TypeScript strict + Vite) |
+| **Frontend** | Node 22 → `npm ci` → `npm test` (Vitest) → `npm run build` (TypeScript strict + Vite) |
 | **Docker** | Runs after both jobs pass → `docker build` of the production image |
 
 No secrets are needed, because tests never call the real model.
@@ -53,7 +53,7 @@ No secrets are needed, because tests never call the real model.
 
 | Stage | Base | Does |
 |-------|------|------|
-| `frontend` | `node:20-alpine` | `npm ci` and `vite build` → `dist/` |
+| `frontend` | `node:22-alpine` | `npm ci` and `vite build` → `dist/` |
 | `runtime` | `python:3.12-slim` | Installs the backend dependencies, copies the app and `dist/`, runs as a non-root user (uid 10001), adds a health check on `/api/health`, starts uvicorn on port 8000 |
 
 ### 4.2 Docker Compose
