@@ -66,13 +66,66 @@ class GroqLLM:
         if runnable is None:
             runnable = self._chat.with_structured_output(schema)
             self._runnables[schema] = runnable
-        try:
-            result = runnable.invoke(messages)
-        except Exception as exc:  # noqa: BLE001
-            raise LLMError(f"{self.model} failed during '{task}': {exc}") from exc
+        result = None
+        last_exc: Exception | None = None
+        for _ in range(2):
+            try:
+                result = runnable.invoke(messages)
+                break
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                recovered = recover_failed_generation(exc, schema)
+                if recovered is not None:
+                    return recovered
+        if result is None and last_exc is not None:
+            raise LLMError(f"{self.model} failed during '{task}': {_short(last_exc)}") from last_exc
         if result is None:
             raise LLMError(f"{self.model} returned no structured output for '{task}'.")
         return result if isinstance(result, schema) else schema.model_validate(result)
+
+
+def _short(exc: Exception, limit: int = 300) -> str:
+    text = str(exc)
+    return text if len(text) <= limit else text[:limit] + "…"
+
+
+def recover_failed_generation(exc: Exception, schema: type[T]) -> T | None:
+    """Rescue a structured answer the provider rejected on a schema technicality.
+
+    Groq validates tool calls server-side and returns HTTP 400 ``tool_use_failed``
+    with the model's arguments in ``failed_generation``. The content is usually
+    fine (e.g. ``null`` instead of an empty list), so we validate it locally with
+    the more forgiving Pydantic model instead of failing the whole request.
+    """
+    raw: Any = None
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        error = body.get("error", body)
+        if isinstance(error, dict):
+            raw = error.get("failed_generation")
+    if raw is None:
+        text = str(exc)
+        if "failed_generation" not in text:
+            return None
+        start = text.find("{", text.find("failed_generation"))
+        raw = text[start:] if start != -1 else None
+    if not raw:
+        return None
+    try:
+        payload = json.JSONDecoder().raw_decode(raw)[0] if isinstance(raw, str) else raw
+    except (TypeError, ValueError):
+        return None
+    if isinstance(payload, dict) and "arguments" in payload:
+        payload = payload["arguments"]
+        if isinstance(payload, str):
+            try:
+                payload = json.loads(payload)
+            except ValueError:
+                return None
+    try:
+        return schema.model_validate(payload)
+    except Exception:  # noqa: BLE001
+        return None
 
 
 Responder = Callable[[str, list[BaseMessage], str], dict[str, Any]]

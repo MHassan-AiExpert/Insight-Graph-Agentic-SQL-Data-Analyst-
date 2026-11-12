@@ -312,7 +312,7 @@ class AnalystNodes:
             InsightReport,
             key=state["question"],
         )
-        chart = validate_chart(report.chart.model_dump(), columns, rows)
+        chart = validate_chart(report.chart.model_dump() if report.chart else {"type": "table"}, columns, rows)
         return {
             "answer": report.answer,
             "key_findings": report.key_findings[:4],

@@ -27,8 +27,10 @@ Nodes never handle raw text: they call `structured("sql", messages, SQLDraft)` a
 
 1. Creates `ChatGroq(model, temperature=0, timeout, max_retries=2)`, adding `reasoning_effort` (default `low`) for reasoning models such as `openai/gpt-oss-120b`.
 2. For each schema, builds `chat.with_structured_output(schema)` once and caches it. LangChain turns the Pydantic model into a tool/function definition, and Groq returns arguments that are parsed back into the model.
-3. Any provider error becomes `LLMError("<model> failed during '<task>': …")`. The API turns this into an SSE `error` event.
-4. A missing API key fails immediately with a clear message.
+3. **Recovery from schema rejections.** Groq validates tool calls on its side. If the model writes a good answer but breaks the schema on a detail (for example `"y": null` for a table chart), Groq returns HTTP 400 `tool_use_failed` with the model's arguments in `failed_generation`. `recover_failed_generation` reads those arguments and validates them with the local Pydantic model, which accepts `null` for optional lists. The answer is kept instead of failing the request. Any other error is retried once.
+4. Schemas are null-tolerant: list fields accept `null` (converted to `[]`) and a missing chart becomes a table, so the JSON schema sent to Groq allows these values in the first place.
+5. Any remaining provider error becomes `LLMError("<model> failed during '<task>': …")`, shortened to a readable length. The API turns this into an SSE `error` event.
+6. A missing API key fails immediately with a clear message.
 
 ### 2.3 ScriptedLLM (tests and evaluation)
 
@@ -86,10 +88,17 @@ File: `backend/tests/test_llm.py`
 | LLM-07 | `test_chart_spec_defaults` | `ChartSpec(type="bar")` has safe defaults | ✅ Pass |
 | LLM-08 | `test_prompts_render_with_all_variables` | All four prompt templates render with their variables (catches missing or misspelt placeholders) | ✅ Pass |
 | LLM-09 | `test_reasoning_effort_only_applies_to_reasoning_models` | `reasoning_effort="low"` is passed to `openai/gpt-oss-*` models and ignored for Llama models | ✅ Pass |
+| LLM-10 | `test_schema_accepts_nulls_for_lists` | A table chart with `x` and `y` set to `null` validates; `y` becomes `[]` | ✅ Pass |
+| LLM-11 | `test_schema_allows_null_in_json_schema` | The JSON schema sent to the provider allows `null` | ✅ Pass |
+| LLM-12 | `test_missing_lists_and_chart_default_safely` | `null` findings, follow-ups, assumptions and chart get safe defaults | ✅ Pass |
+| LLM-13 | `test_recovers_report_from_groq_tool_use_failed` | A real-shaped Groq 400 `tool_use_failed` error is turned back into a valid `InsightReport` | ✅ Pass |
+| LLM-14 | `test_recovers_from_error_text_without_body` | Recovery also works from the error text alone | ✅ Pass |
+| LLM-15 | `test_unrelated_errors_are_not_swallowed` | Network errors and answers missing required fields still fail | ✅ Pass |
+| LLM-16 | `test_groq_client_returns_recovered_answer_instead_of_failing` | `GroqLLM.structured` returns the recovered answer without a second model call | ✅ Pass |
 
 The layer is also exercised by every graph, API and scenario test (40+ structured calls per run).
 
-**Result: 9 / 9 passed.**
+**Result: 16 / 16 passed.**
 
 ## 5. Note on live model testing
 

@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+def _none_to_list(value):
+    """Models sometimes send null for an empty list; treat it as an empty list."""
+    return [] if value is None else value
 
 
 class IntentDecision(BaseModel):
@@ -32,10 +37,12 @@ class TableSelection(BaseModel):
 class SQLDraft(BaseModel):
     sql: str = Field(description="A single read-only SQL SELECT statement.")
     reasoning: str = Field(description="Brief explanation of how the query answers the question.")
-    assumptions: list[str] = Field(
+    assumptions: list[str] | None = Field(
         default_factory=list,
         description="Business assumptions made, e.g. how revenue is defined or which statuses count.",
     )
+
+    _lists = field_validator("assumptions", mode="before")(_none_to_list)
 
 
 class ChartSpec(BaseModel):
@@ -44,17 +51,35 @@ class ChartSpec(BaseModel):
         "kpi for a single number, table when no chart fits."
     )
     x: str | None = Field(default=None, description="Result column used for the x-axis / labels.")
-    y: list[str] = Field(default_factory=list, description="Numeric result column(s) to plot.")
-    title: str = Field(default="", description="Short chart title.")
+    y: list[str] | None = Field(
+        default_factory=list, description="Numeric result column(s) to plot. Empty for a table."
+    )
+    title: str | None = Field(default="", description="Short chart title.")
     series: str | None = Field(
         default=None,
         description="Optional column that splits the data into multiple lines/bars, e.g. 'year' when rows are "
         "(region, year, revenue). Leave empty when each row already holds one x value.",
     )
 
+    _lists = field_validator("y", mode="before")(_none_to_list)
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def _title(cls, value):
+        return value or ""
+
 
 class InsightReport(BaseModel):
     answer: str = Field(description="Direct answer to the question in 2-4 sentences, citing key numbers.")
-    key_findings: list[str] = Field(default_factory=list, description="Up to 4 concise, specific findings.")
-    chart: ChartSpec
-    follow_up_questions: list[str] = Field(default_factory=list, description="Up to 3 useful follow-up questions.")
+    key_findings: list[str] | None = Field(default_factory=list, description="Up to 4 concise, specific findings.")
+    chart: ChartSpec | None = Field(default=None, description="How to visualise the result.")
+    follow_up_questions: list[str] | None = Field(
+        default_factory=list, description="Up to 3 useful follow-up questions."
+    )
+
+    _lists = field_validator("key_findings", "follow_up_questions", mode="before")(_none_to_list)
+
+    @field_validator("chart", mode="before")
+    @classmethod
+    def _chart(cls, value):
+        return value or {"type": "table"}

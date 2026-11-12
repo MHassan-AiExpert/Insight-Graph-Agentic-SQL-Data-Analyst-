@@ -80,7 +80,7 @@ docker compose up --build
 
 | Run | Result |
 |-----|--------|
-| `pytest` (local) | **92 passed** |
+| `pytest` (local) | **99 passed** |
 | `npm test` (local) | **19 passed** |
 | `ruff check` / `ruff format --check` | Clean |
 | `tsc -b && vite build` | Clean |

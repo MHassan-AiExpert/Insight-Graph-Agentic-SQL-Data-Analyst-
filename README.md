@@ -12,7 +12,7 @@ Built with **LangGraph**, **LangChain**, **FastAPI**, **React + TypeScript** and
 ![FastAPI](https://img.shields.io/badge/FastAPI-SSE-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-111%20passing-2E7D52)
+![Tests](https://img.shields.io/badge/tests-118%20passing-2E7D52)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ![InsightGraph answering "What is total revenue by region?"](docs/screenshots/02-revenue-by-region.png)
@@ -72,7 +72,7 @@ Every step streams to the UI in real time, so users can see exactly how each ans
 | ⚡ | **Live streaming** | Server-Sent Events emit each node as it finishes; the UI animates a six-stage pipeline |
 | 🔍 | **Full transparency** | Reasoning trace with timings, SQL viewer, assumptions, tables used and every fixed error |
 | 📥 | **Results workspace** | Sortable, paginated table with currency and percentage formatting and CSV export |
-| 🧪 | **Deterministic test suite** | 111 automated tests (92 backend + 19 frontend), including golden business scenarios, that run without network or API key |
+| 🧪 | **Deterministic test suite** | 118 automated tests (99 backend + 19 frontend), including golden business scenarios, that run without network or API key |
 | 🐳 | **One-command deploy** | Multi-stage Docker image serving the API and the React app on one port |
 
 ## How it works
@@ -402,7 +402,7 @@ curl -N -X POST http://localhost:8000/api/ask/stream \
 ## Testing
 
 ```bash
-cd backend && pytest          # 92 passed
+cd backend && pytest          # 99 passed
 cd frontend && npm test       # 19 passed
 ```
 
@@ -413,6 +413,7 @@ cd frontend && npm test       # 19 passed
 | `test_seed.py` | 5 | Deterministic data, counts, integrity, business constraints |
 | `test_config.py` | 4 | Defaults, environment overrides, CORS parsing, business rules |
 | `test_llm.py` | 9 | Scripted provider, schema validation, Groq client setup, reasoning effort, prompt rendering |
+| `test_llm_recovery.py` | 7 | Null-tolerant schemas and recovery from provider-side `tool_use_failed` rejections |
 | `test_charts.py` | 9 | Chart recommendation, validation and long-format series detection |
 | `test_graph.py` | 11 | Routing, self-correction (execution, validation, empty result), give-up, memory, thread isolation |
 | `test_api.py` | 8 | REST + SSE contract, validation, history |
@@ -443,7 +444,7 @@ The backend suite uses a scripted LLM that replays structured responses. The rea
 │   │   │   └── charts.py       # Chart validation + fallback recommender
 │   │   ├── config.py           # pydantic-settings configuration
 │   │   └── main.py             # FastAPI app, CORS, SPA hosting
-│   ├── tests/                  # 92 tests + golden scenario fixtures
+│   ├── tests/                  # 99 tests + golden scenario fixtures
 │   ├── requirements.txt
 │   └── pyproject.toml
 ├── frontend/

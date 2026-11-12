@@ -24,7 +24,7 @@ One report per module of InsightGraph. Each report explains:
 
 | Suite | Tests | Result |
 |-------|------:|--------|
-| Backend (pytest) | 92 | 92 passed |
+| Backend (pytest) | 99 | 99 passed |
 | Frontend (Vitest + Testing Library) | 19 | 19 passed |
 | Browser checks (Playwright on the running app) | 8 | 8 passed |
 | GitHub Actions CI (backend, frontend, Docker build) | 3 jobs | All green |
@@ -32,6 +32,6 @@ One report per module of InsightGraph. Each report explains:
 Commands to reproduce:
 
 ```bash
-cd backend && pytest          # 92 passed
+cd backend && pytest          # 99 passed
 cd frontend && npm test       # 19 passed
 ```

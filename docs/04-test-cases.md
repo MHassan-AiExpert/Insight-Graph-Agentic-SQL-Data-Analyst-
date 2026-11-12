@@ -9,6 +9,7 @@ Per-module details (how each module works, how it was built, and its test cases)
 | Unit — configuration | `backend/tests/test_config.py` | 4 | Defaults, overrides, CORS parsing, business rules |
 | Unit — data generator | `backend/tests/test_seed.py` | 5 | Determinism, counts, integrity, constraints |
 | Unit — LLM layer | `backend/tests/test_llm.py` | 9 | Scripted provider, schema validation, Groq client, prompts |
+| Unit — LLM recovery | `backend/tests/test_llm_recovery.py` | 7 | Null-tolerant schemas; recovering answers the provider rejected on a schema technicality (`tool_use_failed`) |
 | Unit — SQL guard | `backend/tests/test_sql_guard.py` | 27 | Read-only enforcement, LIMIT handling, intent pre-check |
 | Unit — database | `backend/tests/test_database.py` | 9 | Introspection, read-only connection, timeout, error messages |
 | Unit — charts | `backend/tests/test_charts.py` | 9 | Chart recommendation and validation |
@@ -16,14 +17,14 @@ Per-module details (how each module works, how it was built, and its test cases)
 | Integration — API | `backend/tests/test_api.py` | 8 | REST + SSE contract, validation, history |
 | Regression — golden scenarios | `backend/tests/test_scenarios.py` | 10 | Seven realistic business questions end-to-end against the real database |
 | Frontend — unit and component | `frontend/src/__tests__/*` | 19 | Formatting, chart pivoting, SSE parsing, Pipeline, ResultsTable, Composer |
-| **Total** | | **111** | |
+| **Total** | | **118** | |
 
 All tests run offline. A fresh database is seeded into a temporary directory and the language model is replaced with `ScriptedLLM`, which replays predefined structured responses. The real graph, guard and database code paths still run on every test.
 
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest            # 92 passed
+pytest            # 99 passed
 cd ../frontend && npm test   # 19 passed
 ruff check .
 ```
@@ -100,7 +101,7 @@ ruff check .
 
 ```
 $ pytest
-92 passed
+99 passed
 
 $ npm test
 Test Files  4 passed (4)
